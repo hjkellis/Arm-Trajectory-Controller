@@ -13,7 +13,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     serial_port_sub = Node(
-        pacages='arm_interface',
+        package='arm_interface',
         executable='SerialNode',
         name='serial_subscriber'
     )

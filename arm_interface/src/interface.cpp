@@ -31,7 +31,7 @@ class ArmInterface : public rclcpp::Node {
 
       // subscribe to joint_state messages
       joint_state_subscriber_ = create_subscription<sensor_msgs::msg::JointState>(
-          "robot_state_publisher", 10,
+          "joint_states", 10,
           [this] (const sensor_msgs::msg::JointState msg) {
             std_msgs::msg::String str = serial_format(msg);
             serial_publisher_->publish(str);

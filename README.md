@@ -1,5 +1,5 @@
-# Arm Trajectory Controller
-Trajectory control packages for my robotic arm.
+# ROS2 Planning and Control Packages
+Trajectory planning and control packages for my modified version of the [tw2ka robotic arm](https://www.youtube.com/watch?v=wI4Jh-T0Tlo).
 
 ## Quickstart
 Add the packages to your ROS2 workspace. Source and build the packages.
@@ -10,21 +10,24 @@ colcon build
 source ./install/setup.bash
 ```
 
-To control the individual joints use the joint state publisher GUI launch file.
+Determine the serial port the arm is conected to.
+
+To control the individual joints use the joint state publisher launch file.
 ```bash
-ros2 launch arm_description jsp_link.launch.py
+ros2 launch arm_interface joint_control.launch.py port:=${SERIAL_PORT} rviz:=true
 ```
 
-Control the arm in cartesian space using the `control.launch.py` launch file.
+Control the arm in SE(3) using the `se3_control.launch.py` launch file.
 ```bash
-ros2 launch arm_interface control.launch.py
+ros2 launch arm_interface se3_control.launch.py port:=${SERIAL_PORT}
 ```
 
-## Control Interface
-To interface the with the trajectory controller
+## Instructions
+To control the end effector directly launch `se3_control.launch.py` and use the `/se3_ee` message.
+> `se3_ee` is a ROS2 `geometry_msgs/msg/Pose` message
 
 ## Requirements
 - Ubuntu 24.04+
 - ROS2 Jazzy
 - Jazzy control packages
-- MoveIt!
+- MoveIt 2
