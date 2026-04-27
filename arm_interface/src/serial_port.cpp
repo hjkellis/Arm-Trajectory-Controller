@@ -1,4 +1,4 @@
-#include "serial_port.hpp"
+#include "arm_interface/serial_port.hpp"
 
 SerialPort::SerialPort(const std::string &port, unsigned int baudrate)
   : port_(port), baudrate_(baudrate), fd_(-1), open_(false) {}
@@ -15,7 +15,6 @@ bool SerialPort::open_port() {
     return false;
   }
   
-  // config port
   struct termios tty;
   if (tcgetattr(fd_, &tty) != 0) {
     RCLCPP_ERROR(logger_, "Error getting termios attributes %s",
@@ -27,18 +26,18 @@ bool SerialPort::open_port() {
   cfsetospeed(&tty, baudrate_);
   cfsetispeed(&tty, baudrate_);
 
-  tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
-  tty.c_iflag &= ~IGNBRK; // disable break processing
-  tty.c_lflag = 0; // no signaling chars, no echo
-  tty.c_oflag = 0; // no remapping, no delays
-  tty.c_cc[VMIN]  = 0; // read doesn't block
-  tty.c_cc[VTIME] = 10; // 1 second read timeout
+  tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;
+  tty.c_iflag &= ~IGNBRK;
+  tty.c_lflag = 0;
+  tty.c_oflag = 0;
+  tty.c_cc[VMIN]  = 0;
+  tty.c_cc[VTIME] = 10;
 
-  tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-  tty.c_cflag |= (CLOCAL | CREAD); // ignore modem controls
-  tty.c_cflag &= ~(PARENB | PARODD); // no parity
-  tty.c_cflag &= ~CSTOPB; // one stop bit
-  tty.c_cflag &= ~CRTSCTS; // no hardware flow control
+  tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+  tty.c_cflag |= (CLOCAL | CREAD);
+  tty.c_cflag &= ~(PARENB | PARODD);
+  tty.c_cflag &= ~CSTOPB;
+  tty.c_cflag &= ~CRTSCTS;
 
   if (tcsetattr(fd_, TCSANOW, &tty) != 0) {
     RCLCPP_ERROR(logger_, "Error setting termios attributes %s",
@@ -57,7 +56,7 @@ void SerialPort::close_port() {
     open_ = false;
   }
   RCLCPP_INFO(logger_, "Closed Serial Port %s", port_.c_str());
-};
+}
 
 bool SerialPort::write_data(const std::string &data) {
   if (!open_) {

@@ -21,8 +21,8 @@ def generate_launch_description():
 
     interface_node = Node(
         package="arm_interface",
-        executable='SerialInterface',
-        name='serial_interface',
+        executable='JointInterface',
+        name='joint_interface',
         parameters=[{'port': LaunchConfiguration('port')}]
     )
 

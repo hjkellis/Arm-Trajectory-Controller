@@ -15,6 +15,7 @@ find_package(std_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 include_directories(
   include
@@ -23,7 +24,7 @@ include_directories(
 
 # Serial Library
 add_library(serial_port
-  src/serial_port/serial_port.cpp
+  src/serial_port.cpp
 )
 ament_target_dependencies(serial_port
   rclcpp
@@ -34,9 +35,26 @@ target_include_directories(serial_port
     $<INSTALL_INTERFACE:include>
 )
 
+# Interface Library
+add_library(arm_interface_lib
+  src/joint_interface.cpp
+  src/se3_interface.cpp
+)
+ament_target_dependencies(arm_interface_lib
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+)
+target_include_directories(arm_interface_lib
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(arm_interface_lib serial_port)
+
 # Serial Port Node
 add_executable(SerialNode
-  src/serial_port/serial_port_node.cpp
+  src/serial_node.cpp
 )
 
 ament_target_dependencies(SerialNode
@@ -46,21 +64,35 @@ ament_target_dependencies(SerialNode
 target_link_libraries(SerialNode serial_port)
 
 # interface
-add_executable(SerialInterface
-  src/interface.cpp
+add_executable(JointInterface
+  src/joint_interface_node.cpp
 )
-ament_target_dependencies(SerialInterface
+ament_target_dependencies(JointInterface
   rclcpp
   sensor_msgs
 )
-target_link_libraries(SerialInterface serial_port)
+target_link_libraries(JointInterface arm_interface_lib)
+
+# SE3 interface
+add_executable(SE3Interface
+  src/se3_interface_node.cpp
+)
+ament_target_dependencies(SE3Interface
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+)
+target_link_libraries(SE3Interface arm_interface_lib)
 
 
 # Install
 install(
   TARGETS
+    serial_port
+    arm_interface_lib
     SerialNode
-    SerialInterface
+    JointInterface
+    SE3Interface
   EXPORT export_${PROJECT_NAME}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   ARCHIVE DESTINATION lib
@@ -80,6 +112,7 @@ ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   rclcpp
   sensor_msgs
+  geometry_msgs
 )
 
 ament_package()
